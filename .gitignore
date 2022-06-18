@@ -1,3 +1,9 @@
 
+# ignore temporary files
 ~$*
 *.pyc
+.vscode/
+
+# ignore all keys but keep the keys folder and readme
+/keys/*
+!/keys/readme.md
