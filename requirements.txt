@@ -1,6 +1,10 @@
 SpeechRecognition
-setuptools
-wheel
-pocketsphinx
-oauth2client
-google-api-python-client
+
+pydub
+
+# setuptools
+# wheel
+# pocketsphinx
+
+# oauth2client
+# google-api-python-client
