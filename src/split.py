@@ -20,25 +20,44 @@ print('done')
 # the imported function.
 print('processing chunks...')
 chunklist = []
-for db_change in range(-40, -10, 5):
+from itertools import product
+for x,y in product(range(50, 500, 50), range(-30, -15, 1)):
     chunks = split_on_silence(
         # Use the loaded audio.
         song,
         # Specify that a silent chunk must be at least 2 seconds or 2000 ms long.
-        min_silence_len=100,
+        min_silence_len=x,
         # Consider a chunk silent if it's quieter than -16 dBFS.
         # (You may want to adjust this parameter.)
-        silence_thresh=db_change
+        silence_thresh=-y
     )
-    chunklist.append(chunks)
-    print(f'{db_change} dB found {len(chunks)} chunks')
+    # if len(chunklist) > 0 and abs(len(chunklist[-1]) - 98 < abs(len(chunks) - 98)):
+    #     print('getting further from target, not bothering to continue')
+    #     break
+    # chunklist.append(chunks)
+    print(f'{x} ms, {y} dBFS found {len(chunks)} chunks')
+
+exit() # stop here for now, we are just looking for the length of the chunks
 
 # print(f'found {len(chunks)} chunks')
 if all(len(chunk) == 0 for chunk in chunklist):
     print('no chunks found')
     exit()
 
-exit()
+# use the chunk closest to 98 separations
+# print('using closest chunk...')
+chunks = chunklist[0]
+for i, c in enumerate(chunklist):
+    if abs(98 - len(c)) < abs(98 - len(chunks)):
+        chunks = c
+
+print(f'using {len(chunks)} chunks')
+
+# delete all files in './chunks'
+print('deleting existing chunks...')
+import os
+for file in os.listdir('./chunks'):
+    os.remove('./chunks/' + file)
 
 # Process each chunk with your parameters
 for i, chunk in enumerate(chunks):
@@ -54,7 +73,7 @@ for i, chunk in enumerate(chunks):
     # Export the audio chunk with new bitrate.
     print(f"Exporting chunk{i}.wav.")
     normalized_chunk.export(
-        f"./chunk{i}.wav",
+        f"./chunks/chunk{i}.wav",
         bitrate="192k",
         format="wav"
     )
