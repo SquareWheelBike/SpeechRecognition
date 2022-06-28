@@ -21,7 +21,9 @@ print('done')
 print('processing chunks...')
 chunklist = []
 from itertools import product
-for x,y in product(range(50, 500, 50), range(-30, -15, 1)):
+with open('./results.txt', 'w') as f:
+    pass
+for x,y in product(range(50, 800, 50), range(-32, -15, 1)):
     chunks = split_on_silence(
         # Use the loaded audio.
         song,
@@ -29,13 +31,16 @@ for x,y in product(range(50, 500, 50), range(-30, -15, 1)):
         min_silence_len=x,
         # Consider a chunk silent if it's quieter than -16 dBFS.
         # (You may want to adjust this parameter.)
-        silence_thresh=-y
+        silence_thresh=y
     )
     # if len(chunklist) > 0 and abs(len(chunklist[-1]) - 98 < abs(len(chunks) - 98)):
     #     print('getting further from target, not bothering to continue')
     #     break
     # chunklist.append(chunks)
-    print(f'{x} ms, {y} dBFS found {len(chunks)} chunks')
+    res = f'{x} ms, {y} dBFS found {len(chunks)} chunks'
+    print(res)
+    with open('./results.txt', 'a') as f:
+        f.write(res + '\n')
 
 exit() # stop here for now, we are just looking for the length of the chunks
 
