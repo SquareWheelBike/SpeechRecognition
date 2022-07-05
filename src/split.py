@@ -26,7 +26,8 @@ def worker(x, y, song):
         min_silence_len=x,
         # Consider a chunk silent if it's quieter than -16 dBFS.
         # (You may want to adjust this parameter.)
-        silence_thresh=y
+        silence_thresh=y,
+        keep_silence=100
     )
     return x, y, chunks
 
@@ -36,6 +37,15 @@ if __name__ == '__main__':
     print('loading audio...', end='')
     song = AudioSegment.from_wav("./PP001_Dual_0back.wav")
     print('done')
+
+    # delete the old files
+    print('preparing output directory...')
+    # if chunks not exist, create it
+    if not os.path.exists('./chunks'):
+        os.makedirs('./chunks')
+    else:
+        from reset import delete_subfolders
+        delete_subfolders(path='./chunks')
 
     # Split track where the silence is 2 seconds or more and get chunks using
     # the imported function.
@@ -59,46 +69,34 @@ if __name__ == '__main__':
         print(f'{x} ms, {y} dBFS found {len(chunks)} chunks')
         with open('./results.txt', 'a') as f:
             f.write(f'{r[0]},{r[1]},{len(r[2])}\n')
-
-    exit()  # stop here for now, we are just looking for the length of the chunks
-
-    chunklist = [chunks for x, y, chunks in results]
-
-    # print(f'found {len(chunks)} chunks')
-    if all(len(chunk) == 0 for chunk in chunklist):
-        print('no chunks found')
-        exit()
-
-    # use the chunk closest to 98 separations
-    # print('using closest chunk...')
-    chunks = chunklist[0]
-    for i, c in enumerate(chunklist):
-        if abs(98 - len(c)) < abs(98 - len(chunks)):
-            chunks = c
-
-    print(f'using {len(chunks)} chunks')
-
-    # delete all files in './chunks'
-    print('deleting existing chunks...')
-    import os
-    for file in os.listdir('./chunks'):
-        os.remove('./chunks/' + file)
+    del ps
 
     # Process each chunk with your parameters
-    for i, chunk in enumerate(chunks):
-        # Create a silence chunk that's 0.5 seconds (or 500 ms) long for padding.
-        silence_chunk = AudioSegment.silent(duration=500)
+    for i, result in enumerate(results):
+        x, y, chunks = result
 
-        # Add the padding chunk to beginning and end of the entire chunk.
-        audio_chunk = silence_chunk + chunk + silence_chunk
+        # drop results that are too short or too long
+        if len(chunk) < 98/2 or len(chunk) > 98*3:
+            continue
 
-        # Normalize the entire chunk.
-        normalized_chunk = match_target_amplitude(audio_chunk, -20.0)
+        folder = f'./chunks/{x}_len_{y}_threshold'
+        os.makedirs(folder, exist_ok=False)
 
-        # Export the audio chunk with new bitrate.
-        print(f"Exporting chunk{i}.wav.")
-        normalized_chunk.export(
-            f"./chunks/chunk{i}.wav",
-            bitrate="192k",
-            format="wav"
-        )
+        for chunk in chunks:
+
+            silence_chunk = AudioSegment.silent(duration=100)
+
+            # Add the padding chunk to beginning and end of the entire chunk.
+            audio_chunk = silence_chunk + chunk + silence_chunk
+
+            # Normalize the entire chunk.
+            normalized_chunk = match_target_amplitude(audio_chunk, -20.0)
+
+            # Export the audio chunk with new bitrate.
+            path = f"{folder}/chunk{i}.wav"
+            print(f"Exporting {path}.")
+            normalized_chunk.export(
+                path,
+                bitrate="192k",
+                format="wav"
+            )
