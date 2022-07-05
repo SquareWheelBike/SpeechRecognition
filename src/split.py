@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
     # since we are processing a large number of hyperparameters, we use a pool to parallelize the processing
     ps = []
-    pool = mp.Pool(processes=8)
+    pool = mp.Pool(processes=int(mp.cpu_count() * 0.5))
     for x, y in product(range(50, 800, 50), range(-32, -15, 1)):
         p = pool.apply_async(worker, args=(x, y, song))
         ps.append(p)
