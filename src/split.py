@@ -8,6 +8,7 @@ from pydub import AudioSegment
 from pydub.silence import split_on_silence
 import multiprocessing as mp
 from itertools import product
+import os
 
 
 # Define a function to normalize a chunk to a target amplitude.
