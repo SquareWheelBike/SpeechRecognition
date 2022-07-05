@@ -3,7 +3,7 @@
 ~$*
 *.pyc
 .vscode/
-src/chunks
+# src/chunks
 
 # ignore all keys but keep the keys folder and readme
 /keys/*
