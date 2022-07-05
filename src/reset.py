@@ -3,7 +3,7 @@ import sys
 
 # delete all subfolders and their contents, but not the current folder's contents
 def delete_subfolders(path='.', verbose=False):
-    for root, dirs, files in os.walk(".", topdown=False):
+    for root, dirs, files in os.walk(path, topdown=False):
         print('root:', root) if verbose else None
         for name in dirs:
             os.rmdir(os.path.join(root, name))
