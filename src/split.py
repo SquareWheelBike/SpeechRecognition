@@ -34,6 +34,8 @@ def worker(x, y, song):
 
 
 if __name__ == '__main__':
+    OUTPUTFOLDER = './chunks'
+
     # Load your audio.
     print('loading audio...', end='')
     song = AudioSegment.from_wav("./PP001_Dual_0back.wav")
@@ -42,11 +44,11 @@ if __name__ == '__main__':
     # delete the old files
     print('preparing output directory...')
     # if chunks not exist, create it
-    if not os.path.exists('./chunks'):
-        os.makedirs('./chunks')
+    if not os.path.exists(OUTPUTFOLDER):
+        os.makedirs(OUTPUTFOLDER)
     else:
         from reset import delete_subfolders
-        delete_subfolders(path='./chunks')
+        delete_subfolders(path=OUTPUTFOLDER)
 
     # Split track where the silence is 2 seconds or more and get chunks using
     # the imported function.
@@ -62,28 +64,21 @@ if __name__ == '__main__':
         ps.append(p)
 
     # as processes finish, print the results to the console and write them to a file
-    results = []
+    # results = []
     for p in ps:
         r = p.get()
-        results.append(r)
+        # results.append(r)
         x, y, chunks = r
         print(f'{x} ms, {y} dBFS found {len(chunks)} chunks')
         with open('./results.txt', 'a') as f:
             f.write(f'{r[0]},{r[1]},{len(r[2])}\n')
-    del ps
 
-    # Process each chunk with your parameters
-    for i, result in enumerate(results):
-        x, y, chunks = result
-
-        # drop results that are too short or too long
-        # if len(chunk) < 98/2 or len(chunk) > 98*3:
-        #     continue
-
-        folder = f'./chunks/{x}_len_{y}_threshold'
+        # save the chunks to the output directory
+        folder = os.path.join(OUTPUTFOLDER, f'{x}_len_{y}_threshold')
         os.makedirs(folder, exist_ok=False)
-
-        for chunk in chunks:
+        for i, chunk in enumerate(chunks):
+            path = os.path.join(folder, f"chunk{i}.wav")
+            # print(f"Exporting {path}.")
 
             silence_chunk = AudioSegment.silent(duration=100)
 
@@ -94,8 +89,6 @@ if __name__ == '__main__':
             normalized_chunk = match_target_amplitude(audio_chunk, -20.0)
 
             # Export the audio chunk with new bitrate.
-            path = f"{folder}/chunk{i}.wav"
-            print(f"Exporting {path}.")
             normalized_chunk.export(
                 path,
                 bitrate="192k",
