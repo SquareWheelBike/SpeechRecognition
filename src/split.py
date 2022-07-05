@@ -76,8 +76,8 @@ if __name__ == '__main__':
         x, y, chunks = result
 
         # drop results that are too short or too long
-        if len(chunk) < 98/2 or len(chunk) > 98*3:
-            continue
+        # if len(chunk) < 98/2 or len(chunk) > 98*3:
+        #     continue
 
         folder = f'./chunks/{x}_len_{y}_threshold'
         os.makedirs(folder, exist_ok=False)
