@@ -21,3 +21,5 @@ requirements.txt has all pip requirements. If you are using pocketsphinx, make s
 I am going to need to come up with a way to split each number spoken into its own audio file or `AudioData` object. Right now jumbling numbers into each other in one file is confusing to the reader.
 
 Alternatively, we could just train our own Tensor AI to only recognise the numbers 1-9, but this will require a lot of training data that we will need to make ourselves.
+
+An [article](https://towardsdatascience.com/torch-spoken-digits-recognition-from-features-to-model-357209cd49d1) exists that does something very similar to what is being attempted here
